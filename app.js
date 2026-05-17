@@ -1759,6 +1759,7 @@ function updateControls() {
   els.elevationValue.textContent = state.controls.elevation.toFixed(1).padStart(4, "0");
   els.chargeValue.textContent = pad(Math.round(state.controls.charge), 3);
   els.chargeSlider.value = state.controls.charge;
+  els.chargeSlider.closest(".charge-assembly")?.style.setProperty("--charge-position", state.controls.charge.toFixed(1));
   updatePrecisionControl("azimuth");
   updatePrecisionControl("elevation");
   updatePrecisionControl("charge");
@@ -1939,6 +1940,29 @@ function drawTerrainContours(now) {
   ctx.globalCompositeOperation = "screen";
 
   const drift = Math.sin(now / 2600) * 0.7;
+
+  const mountainBands = [
+    { base: 430, amp: 44, alpha: 0.105, phase: 0.2 },
+    { base: 350, amp: 30, alpha: 0.075, phase: 1.7 }
+  ];
+
+  mountainBands.forEach((band, index) => {
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let i = 0; i <= 96; i += 1) {
+      const x = (w * i) / 96;
+      const y =
+        h - band.base * (h / 620) +
+        Math.sin(i * 0.19 + band.phase + now / 6800) * band.amp +
+        Math.sin(i * 0.047 + index * 2.1) * band.amp * 0.72;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(74,255,109,${band.alpha})`;
+    ctx.fill();
+  });
+
   const hills = [
     { x: -360, y: 225, rx: 190, ry: 86, phase: 0.2 },
     { x: -230, y: 92, rx: 152, ry: 64, phase: 1.1 },

@@ -15,7 +15,7 @@
     <div class="cabinet-handle cabinet-handle-right" aria-hidden="true"></div>
     <div class="grab-bar" aria-hidden="true"></div>
 
-    <header class="top-status">
+    <header class="top-status status-bar top-status-bar">
       <div class="status-card facility-card">
         <span class="tiny-label" data-i18n="top.facility">FACILITY</span>
         <strong data-i18n="top.facilityName">OUTPOST K-77 / REMOTE BATTERY CONTROL</strong>
@@ -55,7 +55,7 @@
     </header>
 
     <main class="station-console reference-station">
-      <section class="upper-console-bay" aria-label="Integrated upper instrument bay">
+      <section class="upper-console-bay equipment-row" aria-label="Integrated upper instrument bay">
         <section class="hardware-module power-distribution">
           <div class="metal-label compact-label"><span data-i18n="panel.powerDistribution">POWER DISTRIBUTION</span></div>
           <div class="rect-meter-row" aria-hidden="true">
@@ -149,8 +149,8 @@
         </section>
       </section>
 
-      <section class="main-control-bank console-deck" aria-label="Primary artillery control bank">
-        <section class="mechanical-control turret-knob azimuth-console" data-control="azimuth">
+      <section class="main-control-bank console-deck control-deck" aria-label="Primary artillery control bank">
+        <section class="mechanical-control dial-module turret-knob azimuth-console" data-control="azimuth">
           <div class="control-title"><span data-i18n="control.azimuth">AZIMUTH</span><span class="status-chip" id="azimuthStatus"><span class="mini-lamp"></span><strong id="azimuthStatusText">--</strong></span></div>
           <div class="dial-rig">
             <div class="dial" id="azimuthDial" data-control="azimuth" role="slider" tabindex="0" aria-label="Azimuth dial" data-i18n-aria="aria.azimuthDial"><div class="dial-face"><div class="dial-needle" id="azimuthNeedle"></div><div class="dial-cap"></div></div></div>
@@ -165,7 +165,7 @@
           </div>
         </section>
 
-        <section class="mechanical-control turret-knob elevation-console" data-control="elevation">
+        <section class="mechanical-control dial-module turret-knob elevation-console" data-control="elevation">
           <div class="control-title"><span data-i18n="control.elevation">ELEVATION</span><span class="status-chip" id="elevationStatus"><span class="mini-lamp"></span><strong id="elevationStatusText">--</strong></span></div>
           <div class="dial-rig">
             <div class="dial" id="elevationDial" data-control="elevation" role="slider" tabindex="0" aria-label="Elevation dial" data-i18n-aria="aria.elevationDial"><div class="dial-face elevation-face"><div class="dial-needle" id="elevationNeedle"></div><div class="dial-cap"></div></div></div>
@@ -191,7 +191,7 @@
           <div class="cassette-slots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
         </section>
 
-        <section class="mechanical-control charge-thrower charge-level-panel" data-control="charge">
+        <section class="mechanical-control lever-module charge-thrower charge-level-panel" data-control="charge">
           <div class="control-title"><span data-i18n="control.charge">CHARGE LEVEL</span><span class="status-chip" id="chargeStatus"><span class="mini-lamp"></span><strong id="chargeStatusText">--</strong></span></div>
           <div class="charge-rig">
             <div class="charge-assembly">
@@ -222,7 +222,7 @@
           <div class="control-help" data-i18n="control.help">DRAG / WHEEL / +/- / TYPE. SHIFT = FINE, CTRL = FAST.</div>
         </section>
 
-        <section class="hardware-module fire-control-panel">
+        <section class="hardware-module fire-control-module fire-control-panel">
           <div class="metal-label danger-label compact-label"><span data-i18n="panel.fireControl">FIRE CONTROL</span></div>
           <div class="action-row"><button class="machine-button" id="calculateButton" type="button" data-i18n="button.calc">BALLISTIC CALC</button><button class="machine-button relay" id="relayButton" type="button" data-i18n="button.relay">RELAY TEST</button></div>
           <div class="armed-lamp" id="armedLamp"><span></span><strong data-i18n="control.fireBus">FIRE BUS</strong></div>
@@ -231,7 +231,7 @@
         </section>
       </section>
 
-      <section class="auxiliary-console-row" aria-label="Auxiliary lower console">
+      <section class="auxiliary-console-row aux-row" aria-label="Auxiliary lower console">
         <section class="hardware-module aux-switch-panel">
           <div class="metal-label compact-label"><span data-i18n="panel.auxPower">AUX BUS</span></div>
           <div class="aux-toggles" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -241,7 +241,7 @@
           <button class="audio-toggle" id="audioToggle" type="button" aria-pressed="false"><span class="audio-led" id="audioLed"></span><strong id="audioState" data-i18n="audio.enabled">AUDIO ENABLED</strong></button>
           <label class="audio-volume-wrap" aria-label="Master volume"><span>LEVEL</span><input class="audio-volume" id="audioVolume" type="range" min="0" max="1" step="0.01" value="0.72"></label>
         </section>
-        <section class="hardware-module log-printer">
+        <section class="hardware-module log-printer system-log-display">
           <div class="metal-label compact-label"><span data-i18n="panel.systemLog">SYSTEM LOG / MESSAGES</span><small data-i18n="panel.teletype">HARDLINE TELETYPE BUFFER</small></div>
           <div class="paper-feed" aria-hidden="true"></div>
           <div class="log-window" id="logWindow" aria-live="polite"></div>
