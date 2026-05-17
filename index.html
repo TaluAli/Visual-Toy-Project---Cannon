@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remote Battery Control Console</title>
+  <link rel="stylesheet" href="styles.css?v=reference-rebuild-01">
+</head>
+<body>
+  <div class="room-haze" aria-hidden="true"></div>
+
+  <div class="console-shell" id="consoleShell">
+    <div class="impact-flash" aria-hidden="true"></div>
+    <div class="cabinet-handle cabinet-handle-left" aria-hidden="true"></div>
+    <div class="cabinet-handle cabinet-handle-right" aria-hidden="true"></div>
+    <div class="grab-bar" aria-hidden="true"></div>
+
+    <header class="top-status">
+      <div class="status-card facility-card">
+        <span class="tiny-label" data-i18n="top.facility">FACILITY</span>
+        <strong data-i18n="top.facilityName">OUTPOST K-77 / REMOTE BATTERY CONTROL</strong>
+      </div>
+      <div class="status-card">
+        <span class="tiny-label" data-i18n="top.sector">SECTOR</span>
+        <strong id="sectorName" data-i18n="top.sectorName">GRID BLACK-04</strong>
+      </div>
+      <div class="status-card">
+        <span class="tiny-label" data-i18n="top.time">SYS TIME</span>
+        <strong id="systemTime">--:--:--</strong>
+      </div>
+      <div class="status-card">
+        <span class="tiny-label" data-i18n="top.comm">COMM</span>
+        <strong id="commState" class="status-good">LINK STABLE</strong>
+      </div>
+      <div class="status-card power-cell">
+        <span class="tiny-label" data-i18n="top.power">POWER BUS</span>
+        <div class="mini-meter"><span id="powerMeter"></span></div>
+        <strong id="powerText">100%</strong>
+      </div>
+      <div class="status-card">
+        <span class="tiny-label" data-i18n="top.turret">TURRET</span>
+        <strong id="readyState">STANDBY</strong>
+      </div>
+      <div class="status-card alert-cell">
+        <span class="warning-bulb" id="topWarning"></span>
+        <strong id="alertState">NO ALERT</strong>
+      </div>
+      <div class="status-card language-cell">
+        <span class="tiny-label" data-i18n="top.language">LANG</span>
+        <div class="language-toggle" aria-label="Interface language">
+          <button class="lang-button active" id="langEn" data-lang="en" type="button">EN</button>
+          <button class="lang-button" id="langKo" data-lang="ko" type="button">KO</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="station-console reference-station">
+      <section class="upper-console-bay" aria-label="Integrated upper instrument bay">
+        <section class="hardware-module power-distribution">
+          <div class="metal-label compact-label"><span data-i18n="panel.powerDistribution">POWER DISTRIBUTION</span></div>
+          <div class="rect-meter-row" aria-hidden="true">
+            <div class="rect-meter"><span style="--meter-angle:-22deg"></span><strong data-i18n="label.mainBus">MAIN BUS</strong></div>
+            <div class="rect-meter"><span style="--meter-angle:12deg"></span><strong data-i18n="label.auxBus">AUX BUS</strong></div>
+            <div class="rect-meter"><span style="--meter-angle:29deg"></span><strong data-i18n="label.systems">SYSTEMS</strong></div>
+          </div>
+          <div class="lamp-strip dense">
+            <div><span class="lamp on"></span><strong data-i18n="label.power">POWER</strong></div>
+            <div><span class="lamp amber on"></span><strong data-i18n="status.standby">STANDBY</strong></div>
+            <div><span class="lamp amber"></span><strong data-i18n="label.backup">BACKUP</strong></div>
+            <div><span class="lamp red"></span><strong data-i18n="label.overload">OVERLOAD</strong></div>
+          </div>
+        </section>
+
+        <section class="hardware-module signal-monitor">
+          <div class="metal-label compact-label"><span data-i18n="panel.signalMonitor">SIGNAL MONITOR</span></div>
+          <div class="signal-body">
+            <div class="link-stack">
+              <span>LINK 1 <b class="status-dot good"></b></span>
+              <span>LINK 2 <b class="status-dot amber"></b></span>
+              <span>LINK 3 <b class="status-dot amber"></b></span>
+              <span>LINK 4 <b class="status-dot good"></b></span>
+            </div>
+            <div class="signal-scope" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="target-card mission-slate">
+            <span class="tiny-label" data-i18n="label.targetPacket">TARGET PACKET</span>
+            <strong id="targetReadout">NO TARGET DATA</strong>
+            <button class="machine-button small" id="newTargetButton" type="button" data-i18n="button.requestTarget">REQUEST TARGET</button>
+          </div>
+          <div class="mission-counter"><span data-i18n="label.missionTimer">MISSION TIMER</span><strong id="missionTimer">00:00</strong></div>
+          <div class="signal-knobs" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="strip-meter"><span data-i18n="label.radarNoise">RADAR NOISE</span><div class="meter-track"><b id="radarNoiseBar"></b></div></div>
+          <div class="strip-meter"><span data-i18n="label.servoTemp">SERVO TEMP</span><div class="meter-track warn"><b id="servoTempBar"></b></div></div>
+          <div class="strip-meter"><span data-i18n="label.visualRange">VISUAL RANGE</span><div class="meter-track amber"><b id="visibilityBar"></b></div></div>
+        </section>
+
+        <section class="hardware-module status-tower checklist-strip">
+          <div class="metal-label compact-label"><span data-i18n="panel.sightLine">SIGHT LINE</span></div>
+          <div class="checklist" id="checklist">
+            <div class="check-row" data-step="target"><span class="lamp"></span><strong data-i18n="check.target">TARGET DATA RECEIVED</strong></div>
+            <div class="check-row" data-step="solution"><span class="lamp"></span><strong data-i18n="check.solution">BALLISTIC SOLUTION COMPUTED</strong></div>
+            <div class="check-row" data-step="charge"><span class="lamp"></span><strong data-i18n="check.charge">CHARGE LOADED</strong></div>
+            <div class="check-row" data-step="azimuth"><span class="lamp"></span><strong data-i18n="check.azimuth">AZIMUTH WITHIN TOLERANCE</strong></div>
+            <div class="check-row" data-step="elevation"><span class="lamp"></span><strong data-i18n="check.elevation">ELEVATION WITHIN TOLERANCE</strong></div>
+            <div class="check-row" data-step="stabilizer"><span class="lamp"></span><strong data-i18n="check.stabilizer">STABILIZER ENGAGED</strong></div>
+            <div class="check-row" data-step="safety"><span class="lamp red"></span><strong data-i18n="check.safety">SAFETY INTERLOCK RELEASED</strong></div>
+            <div class="check-row" data-step="armed"><span class="lamp amber"></span><strong data-i18n="check.armed">FIRE CIRCUIT ARMED</strong></div>
+          </div>
+        </section>
+
+        <section class="embedded-monitor hardware-module tactical-display-module">
+          <div class="metal-label monitor-label">
+            <span data-i18n="panel.tacticalCrt">TACTICAL DISPLAY</span>
+            <small id="crtMode" data-i18n="panel.solutionMonitor">SOLUTION MONITOR</small>
+          </div>
+          <div class="crt-housing">
+            <div class="crt-bezel" id="crtBezel">
+              <div class="glass-glare" aria-hidden="true"></div>
+              <div class="crt-header">
+                <span id="gridLabel">SECTOR GRID // NO LOCK</span>
+                <span id="solutionReadout">SOLUTION: --</span>
+              </div>
+              <div class="crt-screen">
+                <canvas id="tacticalMap" aria-label="Tactical grid and ballistic tracking display"></canvas>
+                <div class="crt-vignette" aria-hidden="true"></div>
+                <div class="crt-scanlines" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="crt-service" aria-hidden="true">
+              <div class="service-knob"></div>
+              <div class="speaker-slits"><span></span><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="hardware-module weather-monitor environment-instruments">
+          <div class="metal-label compact-label"><span data-i18n="panel.weatherMonitor">WEATHER MONITOR</span></div>
+          <div class="weather-gauge-grid">
+            <div class="analog-gauge gauge-wind-speed"><span class="gauge-needle"></span><strong data-i18n="label.windSpeed">WIND SPEED</strong><em id="windSpeedReadout">--</em></div>
+            <div class="analog-gauge gauge-wind-dir"><span class="gauge-needle"></span><strong data-i18n="label.windDir">WIND DIR</strong><em id="windDirReadout">---</em></div>
+            <div class="analog-gauge gauge-temp"><span class="gauge-needle"></span><strong data-i18n="label.temp">TEMP</strong><em id="temperatureReadout">--</em></div>
+            <div class="analog-gauge gauge-pressure"><span class="gauge-needle"></span><strong data-i18n="label.pressure">PRESSURE</strong><em id="pressureReadout">----</em></div>
+            <div class="analog-gauge gauge-noise"><span class="gauge-needle" id="noiseNeedle"></span><strong data-i18n="label.radarNoiseShort">NOISE</strong><em id="weatherReadout">CLEAR</em></div>
+            <div class="analog-gauge gauge-visibility"><span class="gauge-needle" id="servoNeedle"></span><strong data-i18n="label.visibility">VISIBILITY</strong><em id="visibilityReadout">--</em></div>
+          </div>
+          <div class="serial-plate">71-2309-04&nbsp;&nbsp; SERIAL NO. 8847</div>
+        </section>
+      </section>
+
+      <section class="main-control-bank console-deck" aria-label="Primary artillery control bank">
+        <section class="mechanical-control turret-knob azimuth-console" data-control="azimuth">
+          <div class="control-title"><span data-i18n="control.azimuth">AZIMUTH</span><span class="status-chip" id="azimuthStatus"><span class="mini-lamp"></span><strong id="azimuthStatusText">--</strong></span></div>
+          <div class="dial-rig">
+            <div class="dial" id="azimuthDial" data-control="azimuth" role="slider" tabindex="0" aria-label="Azimuth dial" data-i18n-aria="aria.azimuthDial"><div class="dial-face"><div class="dial-needle" id="azimuthNeedle"></div><div class="dial-cap"></div></div></div>
+            <div class="trim-column"><button class="trim-button" data-control="azimuth" data-step="up" type="button">+</button><button class="trim-button" data-control="azimuth" data-step="down" type="button">-</button></div>
+          </div>
+          <div class="dial-readout"><span id="azimuthValue">000.0</span><em data-i18n="unit.deg">DEG</em></div>
+          <div class="control-grid">
+            <label><span data-i18n="control.current">CURRENT</span><input id="azimuthInput" type="number" step="0.1" min="0" max="359.9"></label>
+            <div><span data-i18n="control.recommended">RECOMMENDED</span><strong id="azimuthRecommended">--</strong></div>
+            <div><span data-i18n="control.delta">DELTA</span><strong id="azimuthDelta">--</strong></div>
+            <button class="match-button" id="azimuthMatchButton" data-control="azimuth" type="button" data-i18n="control.matchSolution">MATCH SOLUTION</button>
+          </div>
+        </section>
+
+        <section class="mechanical-control turret-knob elevation-console" data-control="elevation">
+          <div class="control-title"><span data-i18n="control.elevation">ELEVATION</span><span class="status-chip" id="elevationStatus"><span class="mini-lamp"></span><strong id="elevationStatusText">--</strong></span></div>
+          <div class="dial-rig">
+            <div class="dial" id="elevationDial" data-control="elevation" role="slider" tabindex="0" aria-label="Elevation dial" data-i18n-aria="aria.elevationDial"><div class="dial-face elevation-face"><div class="dial-needle" id="elevationNeedle"></div><div class="dial-cap"></div></div></div>
+            <div class="trim-column"><button class="trim-button" data-control="elevation" data-step="up" type="button">+</button><button class="trim-button" data-control="elevation" data-step="down" type="button">-</button></div>
+          </div>
+          <div class="dial-readout"><span id="elevationValue">00.0</span><em data-i18n="unit.deg">DEG</em></div>
+          <div class="control-grid">
+            <label><span data-i18n="control.current">CURRENT</span><input id="elevationInput" type="number" step="0.1" min="0" max="75"></label>
+            <div><span data-i18n="control.recommended">RECOMMENDED</span><strong id="elevationRecommended">--</strong></div>
+            <div><span data-i18n="control.delta">DELTA</span><strong id="elevationDelta">--</strong></div>
+            <button class="match-button" id="elevationMatchButton" data-control="elevation" type="button" data-i18n="control.matchSolution">MATCH SOLUTION</button>
+          </div>
+        </section>
+
+        <section class="hardware-module shell-cassette payload-select">
+          <div class="metal-label compact-label"><span data-i18n="control.shellMass">SHELL / PAYLOAD SELECT</span></div>
+          <div class="payload-dial-plate" aria-hidden="true"><span></span></div>
+          <div class="shell-selector" role="radiogroup" aria-label="Shell mass selector" data-i18n-aria="aria.shellMass">
+            <button class="shell-button" data-weight="140" type="button">140KG</button>
+            <button class="shell-button active" data-weight="180" type="button">180KG</button>
+            <button class="shell-button" data-weight="220" type="button">220KG</button>
+          </div>
+          <div class="cassette-slots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        </section>
+
+        <section class="mechanical-control charge-thrower charge-level-panel" data-control="charge">
+          <div class="control-title"><span data-i18n="control.charge">CHARGE LEVEL</span><span class="status-chip" id="chargeStatus"><span class="mini-lamp"></span><strong id="chargeStatusText">--</strong></span></div>
+          <div class="charge-rig">
+            <div class="charge-assembly">
+              <input id="chargeSlider" type="range" min="0" max="100" value="38" aria-label="Charge level" data-i18n-aria="aria.charge">
+              <div class="charge-slot" aria-hidden="true"></div>
+              <div class="charge-scale"><span data-i18n="scale.max">MAX</span><span>3/4</span><span>1/2</span><span>1/4</span><span data-i18n="scale.min">MIN</span></div>
+            </div>
+            <div class="trim-column"><button class="trim-button" data-control="charge" data-step="up" type="button">+</button><button class="trim-button" data-control="charge" data-step="down" type="button">-</button></div>
+          </div>
+          <div class="charge-readout"><span id="chargeValue">038</span><em data-i18n="unit.unit">UNIT</em></div>
+          <div class="control-grid">
+            <label><span data-i18n="control.current">CURRENT</span><input id="chargeInput" type="number" step="1" min="0" max="100"></label>
+            <div><span data-i18n="control.recommended">RECOMMENDED</span><strong id="chargeRecommended">--</strong></div>
+            <div><span data-i18n="control.delta">DELTA</span><strong id="chargeDelta">--</strong></div>
+            <button class="match-button" id="chargeMatchButton" data-control="charge" type="button" data-i18n="control.matchSolution">MATCH SOLUTION</button>
+          </div>
+        </section>
+
+        <section class="hardware-module safety-interlock-panel">
+          <div class="metal-label compact-label"><span data-i18n="control.safety">SAFETY INTERLOCK</span></div>
+          <button class="toggle-switch danger safety-cover-switch" id="safetySwitch" type="button" aria-pressed="false"><span class="switch-lever"></span><strong data-i18n="control.safeLocked">SAFE LOCKED</strong></button>
+          <div class="hazard-plate"><span data-i18n="control.fireEnable">FIRE ENABLE</span><br><small data-i18n="control.twoAction">REQUIRES TWO-ACTION</small></div>
+        </section>
+
+        <section class="hardware-module stabilization-panel">
+          <div class="metal-label compact-label"><span data-i18n="control.stabilizer">STABILIZATION</span></div>
+          <button class="toggle-switch stabilizer-toggle" id="stabilizerSwitch" type="button" aria-pressed="false"><span class="switch-lever"></span><strong data-i18n="control.gyroAssist">GYRO ASSIST</strong></button>
+          <div class="control-help" data-i18n="control.help">DRAG / WHEEL / +/- / TYPE. SHIFT = FINE, CTRL = FAST.</div>
+        </section>
+
+        <section class="hardware-module fire-control-panel">
+          <div class="metal-label danger-label compact-label"><span data-i18n="panel.fireControl">FIRE CONTROL</span></div>
+          <div class="action-row"><button class="machine-button" id="calculateButton" type="button" data-i18n="button.calc">BALLISTIC CALC</button><button class="machine-button relay" id="relayButton" type="button" data-i18n="button.relay">RELAY TEST</button></div>
+          <div class="armed-lamp" id="armedLamp"><span></span><strong data-i18n="control.fireBus">FIRE BUS</strong></div>
+          <div class="fire-section"><div class="safety-cage" aria-hidden="true"></div><button class="fire-button" id="fireButton" type="button" disabled data-i18n="button.fire">FIRE</button></div>
+          <div class="warning-plate"><span data-i18n="label.warning">WARNING</span><br><small data-i18n="label.weaponWillFire">WEAPON WILL FIRE</small></div>
+        </section>
+      </section>
+
+      <section class="auxiliary-console-row" aria-label="Auxiliary lower console">
+        <section class="hardware-module aux-switch-panel">
+          <div class="metal-label compact-label"><span data-i18n="panel.auxPower">AUX BUS</span></div>
+          <div class="aux-toggles" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        </section>
+        <section class="hardware-module audio-alert-panel">
+          <div class="metal-label compact-label"><span data-i18n="panel.audioAlerts">AUDIO ALERTS</span></div>
+          <button class="audio-toggle" id="audioToggle" type="button" aria-pressed="false"><span class="audio-led" id="audioLed"></span><strong id="audioState" data-i18n="audio.enabled">AUDIO ENABLED</strong></button>
+          <label class="audio-volume-wrap" aria-label="Master volume"><span>LEVEL</span><input class="audio-volume" id="audioVolume" type="range" min="0" max="1" step="0.01" value="0.72"></label>
+        </section>
+        <section class="hardware-module log-printer">
+          <div class="metal-label compact-label"><span data-i18n="panel.systemLog">SYSTEM LOG / MESSAGES</span><small data-i18n="panel.teletype">HARDLINE TELETYPE BUFFER</small></div>
+          <div class="paper-feed" aria-hidden="true"></div>
+          <div class="log-window" id="logWindow" aria-live="polite"></div>
+        </section>
+        <section class="hardware-module system-mode-panel">
+          <div class="metal-label compact-label"><span data-i18n="panel.systemMode">SYSTEM MODE</span></div>
+          <div class="big-rotary" aria-hidden="true"><span></span></div>
+          <div class="mode-labels">MANUAL&nbsp;&nbsp; SEMI-AUTO&nbsp;&nbsp; AUTO</div>
+        </section>
+        <section class="hardware-module range-scale-panel">
+          <div class="metal-label compact-label"><span data-i18n="panel.rangeScale">RANGE SCALE</span></div>
+          <div class="big-rotary" aria-hidden="true"><span></span></div>
+          <div class="mode-labels">X1&nbsp;&nbsp; X10&nbsp;&nbsp; X1000</div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
