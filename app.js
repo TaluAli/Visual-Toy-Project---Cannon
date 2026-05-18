@@ -84,6 +84,8 @@ const I18N = {
     "canvas.wind": "WIND",
     "canvas.radarNoise": "RADAR NOISE {value}%",
     "canvas.comm": "COMM {value}%",
+    "canvas.terrain": "RELIEF CONTOUR",
+    "canvas.ridgeLine": "RIDGE",
     "weather.clear": "CLEAR",
     "weather.fog": "FOG BANK",
     "weather.rain": "LIGHT RAIN",
@@ -228,6 +230,8 @@ const I18N = {
     "canvas.wind": "풍향",
     "canvas.radarNoise": "레이더 노이즈 {value}%",
     "canvas.comm": "통신 {value}%",
+    "canvas.terrain": "지형 등고",
+    "canvas.ridgeLine": "능선",
     "weather.clear": "맑음",
     "weather.fog": "안개층",
     "weather.rain": "약한 비",
@@ -1933,24 +1937,62 @@ function drawGrid(now) {
   ctx.fillText(t("canvas.batteryOrigin"), worldToScreen(10, -18).x, worldToScreen(10, -18).y);
 }
 
+function terrainHeight(x, y, now = 0) {
+  const slowDrift = Math.sin(now / 9200) * 0.08;
+  const ridgeA = Math.sin((x * 0.010) + slowDrift) * 0.55 + Math.cos((y * 0.013) - 0.4) * 0.42;
+  const ridgeB = Math.sin((x + y) * 0.006 + 1.7) * 0.35 + Math.cos((x - y) * 0.008 - 2.1) * 0.28;
+  const massif =
+    1.55 * Math.exp(-(((x + 310) ** 2) / 78000 + ((y - 205) ** 2) / 34000)) +
+    1.28 * Math.exp(-(((x - 260) ** 2) / 90000 + ((y + 150) ** 2) / 52000)) +
+    0.92 * Math.exp(-(((x + 45) ** 2) / 52000 + ((y + 265) ** 2) / 29000));
+  const valley = 0.75 * Math.exp(-(((x - 60) ** 2) / 190000 + ((y - 20) ** 2) / 17000));
+  return ridgeA + ridgeB + massif - valley;
+}
+
+function traceContour(level, yStart, now) {
+  const points = [];
+  let last = null;
+  for (let xi = -WORLD_LIMIT; xi <= WORLD_LIMIT; xi += 18) {
+    let bestY = yStart;
+    let bestDelta = Infinity;
+    for (let yi = yStart - 54; yi <= yStart + 54; yi += 9) {
+      const delta = Math.abs(terrainHeight(xi, yi, now) - level);
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestY = yi;
+      }
+    }
+    const relaxedY = last === null ? bestY : last * 0.72 + bestY * 0.28;
+    points.push(worldToScreen(xi, relaxedY));
+    last = relaxedY;
+  }
+  return points;
+}
+
 function drawTerrainContours(now) {
   const w = state.render.width;
   const h = state.render.height;
   ctx.save();
   ctx.globalCompositeOperation = "screen";
 
-  const drift = Math.sin(now / 2600) * 0.7;
+  const glow = ctx.createRadialGradient(w * 0.48, h * 0.48, 10, w * 0.48, h * 0.48, Math.max(w, h) * 0.72);
+  glow.addColorStop(0, "rgba(83,255,109,0.075)");
+  glow.addColorStop(0.55, "rgba(45,172,76,0.035)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
 
   const mountainBands = [
-    { base: 430, amp: 44, alpha: 0.105, phase: 0.2 },
-    { base: 350, amp: 30, alpha: 0.075, phase: 1.7 }
+    { base: 430, amp: 44, alpha: 0.115, phase: 0.2 },
+    { base: 350, amp: 30, alpha: 0.082, phase: 1.7 },
+    { base: 275, amp: 22, alpha: 0.052, phase: 3.1 }
   ];
 
   mountainBands.forEach((band, index) => {
     ctx.beginPath();
     ctx.moveTo(0, h);
-    for (let i = 0; i <= 96; i += 1) {
-      const x = (w * i) / 96;
+    for (let i = 0; i <= 120; i += 1) {
+      const x = (w * i) / 120;
       const y =
         h - band.base * (h / 620) +
         Math.sin(i * 0.19 + band.phase + now / 6800) * band.amp +
@@ -1963,56 +2005,69 @@ function drawTerrainContours(now) {
     ctx.fill();
   });
 
-  const hills = [
-    { x: -360, y: 225, rx: 190, ry: 86, phase: 0.2 },
-    { x: -230, y: 92, rx: 152, ry: 64, phase: 1.1 },
-    { x: 250, y: 235, rx: 205, ry: 76, phase: 2.0 },
-    { x: 370, y: -150, rx: 175, ry: 92, phase: 2.7 },
-    { x: -410, y: -250, rx: 138, ry: 58, phase: 3.4 }
+  for (let yBand = -520; yBand <= 520; yBand += 42) {
+    const terrainLevel = -0.85 + ((yBand + 520) / 1040) * 2.7;
+    const points = traceContour(terrainLevel, yBand, now);
+    ctx.beginPath();
+    points.forEach((p, index) => {
+      if (index === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    const major = Math.round((terrainLevel + 1) * 10) % 4 === 0;
+    ctx.strokeStyle = major ? "rgba(131,255,149,0.18)" : "rgba(111,255,142,0.095)";
+    ctx.lineWidth = major ? 1.1 : 0.72;
+    ctx.stroke();
+  }
+
+  const hillCenters = [
+    { x: -330, y: 205, rx: 206, ry: 86, phase: 0.2 },
+    { x: 252, y: -148, rx: 220, ry: 98, phase: 2.0 },
+    { x: -38, y: 282, rx: 160, ry: 58, phase: 1.4 }
   ];
 
-  hills.forEach((hill, hillIndex) => {
-    for (let level = 0; level < 8; level += 1) {
-      const scale = 1 - level * 0.095;
+  hillCenters.forEach((hill, hillIndex) => {
+    for (let level = 0; level < 10; level += 1) {
+      const scale = 1 - level * 0.078;
       ctx.beginPath();
-      for (let i = 0; i <= 128; i += 1) {
-        const a = (Math.PI * 2 * i) / 128;
-        const wobble =
-          1 +
-          Math.sin(a * 3 + hill.phase + hillIndex) * 0.055 +
-          Math.cos(a * 5.7 + hill.phase * 1.8) * 0.035;
+      for (let i = 0; i <= 150; i += 1) {
+        const a = (Math.PI * 2 * i) / 150;
+        const wobble = 1 + Math.sin(a * 3 + hill.phase + hillIndex) * 0.055 + Math.cos(a * 6.1 + hill.phase * 1.8) * 0.035;
         const x = hill.x + Math.cos(a) * hill.rx * scale * wobble;
-        const y = hill.y + Math.sin(a) * hill.ry * scale * wobble + drift * level;
+        const y = hill.y + Math.sin(a) * hill.ry * scale * wobble + Math.sin(now / 2600) * 0.6 * level;
         const p = worldToScreen(x, y);
         if (i === 0) ctx.moveTo(p.x, p.y);
         else ctx.lineTo(p.x, p.y);
       }
       ctx.closePath();
-      ctx.strokeStyle = `rgba(119,255,150,${0.065 + level * 0.017})`;
-      ctx.lineWidth = level % 3 === 0 ? 1.05 : 0.72;
+      ctx.strokeStyle = `rgba(119,255,150,${0.06 + level * 0.015})`;
+      ctx.lineWidth = level % 3 === 0 ? 1.05 : 0.7;
       ctx.stroke();
     }
   });
 
-  ctx.strokeStyle = "rgba(119,255,150,0.13)";
-  ctx.lineWidth = 0.8;
-  for (let ridge = 0; ridge < 9; ridge += 1) {
+  ctx.strokeStyle = "rgba(174,255,183,0.16)";
+  ctx.lineWidth = 1.05;
+  ctx.setLineDash([10, 8]);
+  [-390, -120, 165, 410].forEach((ridgeOffset, ridgeIndex) => {
     ctx.beginPath();
-    for (let i = 0; i <= 90; i += 1) {
-      const x = -WORLD_LIMIT + (WORLD_LIMIT * 2 * i) / 90;
-      const y =
-        -280 + ridge * 70 +
-        Math.sin(i * 0.18 + ridge * 1.7) * 22 +
-        Math.sin(i * 0.07 + ridge) * 39;
+    for (let i = 0; i <= 86; i += 1) {
+      const x = -WORLD_LIMIT + (WORLD_LIMIT * 2 * i) / 86;
+      const y = ridgeOffset + Math.sin(i * 0.16 + ridgeIndex * 1.9) * 24 + Math.sin(i * 0.055 + ridgeIndex) * 42;
       const p = worldToScreen(x, y);
       if (i === 0) ctx.moveTo(p.x, p.y);
       else ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
-  }
+  });
+  ctx.setLineDash([]);
 
-  ctx.fillStyle = "rgba(119,255,150,0.055)";
-  for (let i = 0; i < 26; i += 1) {
+  ctx.fillStyle = "rgba(119,255,150,0.7)";
+  ctx.font = "10px Courier New";
+  ctx.fillText(t("canvas.terrain"), 18, 22);
+  ctx.fillText(`${t("canvas.ridgeLine")} 2470`, w - 118, 24);
+
+  ctx.fillStyle = "rgba(119,255,150,0.05)";
+  for (let i = 0; i < 34; i += 1) {
     const x = (i * 97 + 43) % w;
     const y = (i * 53 + 31) % h;
     ctx.fillRect(x, y, 2, 2);
