@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Remote Battery Control Console</title>
-  <link rel="stylesheet" href="styles.css?v=reference-rebuild-01">
+  <link rel="stylesheet" href="styles.css?v=military-console-02">
 </head>
 <body>
   <div class="room-haze" aria-hidden="true"></div>
@@ -180,7 +180,7 @@
           </div>
         </section>
 
-        <section class="hardware-module shell-cassette payload-select">
+        <section class="hardware-module shell-cassette payload-select payload-select-module">
           <div class="metal-label compact-label"><span data-i18n="control.shellMass">SHELL / PAYLOAD SELECT</span></div>
           <div class="payload-dial-plate" aria-hidden="true"><span></span></div>
           <div class="shell-selector" role="radiogroup" aria-label="Shell mass selector" data-i18n-aria="aria.shellMass">
@@ -210,13 +210,13 @@
           </div>
         </section>
 
-        <section class="hardware-module safety-interlock-panel">
+        <section class="hardware-module safety-interlock-panel safety-interlock-module">
           <div class="metal-label compact-label"><span data-i18n="control.safety">SAFETY INTERLOCK</span></div>
           <button class="toggle-switch danger safety-cover-switch" id="safetySwitch" type="button" aria-pressed="false"><span class="switch-lever"></span><strong data-i18n="control.safeLocked">SAFE LOCKED</strong></button>
           <div class="hazard-plate"><span data-i18n="control.fireEnable">FIRE ENABLE</span><br><small data-i18n="control.twoAction">REQUIRES TWO-ACTION</small></div>
         </section>
 
-        <section class="hardware-module stabilization-panel">
+        <section class="hardware-module stabilization-panel stabilization-module">
           <div class="metal-label compact-label"><span data-i18n="control.stabilizer">STABILIZATION</span></div>
           <button class="toggle-switch stabilizer-toggle" id="stabilizerSwitch" type="button" aria-pressed="false"><span class="switch-lever"></span><strong data-i18n="control.gyroAssist">GYRO ASSIST</strong></button>
           <div class="control-help" data-i18n="control.help">DRAG / WHEEL / +/- / TYPE. SHIFT = FINE, CTRL = FAST.</div>
